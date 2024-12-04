@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge PDF Pages - PDF Tools</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Merge PDF Pages Vertically</h1>
+        <p>Convert a multi-page PDF into a single long page</p>
+
+        <div class="tool-container">
+            <div class="upload-form">
+                <form id="uploadForm">
+                    <input type="file" id="pdfFile" accept=".pdf" required>
+                    <button type="submit" class="btn-primary">Upload and Merge</button>
+                </form>
+            </div>
+
+            <div id="status"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const statusDiv = document.getElementById('status');
+            const fileInput = document.getElementById('pdfFile');
+            const formData = new FormData();
+
+            formData.append('file', fileInput.files[0]);
+
+            statusDiv.textContent = 'Processing...';
+
+            try {
+                const response = await fetch('merge-to-single/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <p class="success">Success! Click below to download:</p>
+                        <a href="merge-to-single/download/${data.filename}"
+                           class="btn-download" download>Download Merged PDF</a>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `<p class="error">Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<p class="error">An error occurred during upload</p>';
+            }
+        });
+    </script>
+</body>
+</html>
